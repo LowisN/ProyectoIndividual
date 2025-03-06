@@ -58,6 +58,7 @@ http://localhost:8080
 **Administrador:**
 - 📧 Email: admin@sistema.com
 - 🔒 Contraseña: admin123
+Lo anterior dependerá de pruebas futuras ya que no se pudo hacer en otro equipo aún.
 
 ## ⚙️ Panel de Administración
 
