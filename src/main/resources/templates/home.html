@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Recomendaciones</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            margin: 0;
+            background: #f5f6fa;
+        }
+
+        .header {
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
+                        url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2290&auto=format&fit=crop') center/cover;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 0.5rem;
+            color: #333;
+
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .welcome-message {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .menu-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .menu-button {
+            background: white;
+            color: #2c3e50;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .menu-button:hover {
+            transform: translateY(-5px);
+        }
+        
+        h1 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .logout {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .logout a {
+            color: #7f8c8d;
+            text-decoration: none;
+        }
+
+        .logout a:hover {
+            color: #34495e;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Sistema de Recomendaciones</h1>
+    </div>
+    
+    <div class="container">
+        <h1>Bienvenido</h1>
+        <p class="welcome-message">Hola, Usuario</p>
+        
+        <div class="menu-options">
+            <a href="/libros" class="menu-button">Libros</a>
+            <a href="/peliculas" class="menu-button">Películas</a>
+            <a href="/perfil" class="menu-button">Mi Perfil</a>
+            <a sec:authorize="hasRole('ROLE_ADMIN')" href="/admin" 
+            class="menu-button admin-button">
+            Panel de Administrador
+            </a>
+        </div>
+        
+        <a href="/logout" class="logout">Cerrar Sesión</a>
+    </div>
+</body>
+</html>

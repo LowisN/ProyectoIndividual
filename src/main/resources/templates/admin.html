@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1552302896-5c1349f3337d?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            color: white;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+            display: block;
+            margin-top: 15px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+        .admin-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            color: white;
+        }
+
+        .admin-table td span {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin: 1px;
+        }
+
+        .admin-table td span:nth-child(odd) {
+            background-color: rgba(76, 175, 80, 0.2);
+        }        
+
+        .admin-table th, .admin-table td {
+            padding: 12px;
+            border: 1px solid #ffffff3d;
+            text-align: left;
+        }
+
+        .admin-table th {
+            background-color: rgba(76, 175, 80, 0.3);
+        }
+
+        .button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        .edit-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .add-btn {
+            background-color: #4CAF50;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            color: white;
+        }
+
+        .form-group {
+            margin: 10px 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Panel de Administración</h1>
+        
+        <button class="button add-btn" onclick="showAddModal()">Agregar Usuario</button>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Roles</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="usuario : ${usuarios}">
+                    <td th:text="${usuario.id}"></td>
+                    <td th:text="${usuario.nombre}"></td>
+                    <td th:text="${usuario.email}"></td>
+                    <td>
+                        <span th:each="rol, iterStat : ${usuario.roles}">
+                            <span th:text="${#strings.replace(rol.nombre, 'ROLE_', '')}"></span>
+                            <span th:if="${!iterStat.last}">, </span>
+                        </span>
+                    </td>
+                    <td>
+                        <button class="button edit-btn" th:onclick="'showEditModal(' + ${usuario.id} + ')'">Editar</button>
+                        <button class="button delete-btn" th:onclick="'deleteUser(' + ${usuario.id} + ')'">Eliminar</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Modal para Agregar/Editar Usuario -->
+        <div id="userModal" class="modal">
+            <div class="modal-content">
+                <h2 id="modalTitle">Agregar Usuario</h2>
+                <form id="userForm" th:action="@{/admin/saveUser}" method="post">
+                    <input type="hidden" id="userId" name="id">
+                    <div class="form-group">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" id="password" name="password">
+                    </div>
+                    <div class="form-group">
+                        <label for="roles">Roles:</label>
+                        <select id="roles" name="roles" multiple required>
+                            <option value="ROLE_USER">Usuario</option>
+                            <option value="ROLE_ADMIN">Administrador</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="button add-btn">Guardar</button>
+                    <button type="button" class="button delete-btn" onclick="hideModal()">Cancelar</button>
+                </form>
+            </div>
+        </div>
+
+        <a href="/home" style="margin-top: 20px;">Volver al Inicio</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </div>
+
+    <script>
+        function showAddModal() {
+            document.getElementById('modalTitle').textContent = 'Agregar Usuario';
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('userModal').style.display = 'block';
+        }
+
+        function showEditModal(userId) {
+            document.getElementById('modalTitle').textContent = 'Editar Usuario';
+            fetch(`/admin/user/${userId}`)
+                .then(response => response.json())
+                .then(user => {
+                    document.getElementById('userId').value = user.id;
+                    document.getElementById('nombre').value = user.nombre;
+                    document.getElementById('email').value = user.email;
+                    
+                    // Configurar roles
+                    const rolesSelect = document.getElementById('roles');
+                    const userRoles = user.roles.map(rol => rol.nombre);
+                    Array.from(rolesSelect.options).forEach(option => {
+                        option.selected = userRoles.includes(option.value);
+                    });
+                });
+            document.getElementById('userModal').style.display = 'block';
+        }
+
+        function hideModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        function deleteUser(userId) {
+            if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+                fetch(`/admin/deleteUser/${userId}`, {
+                    method: 'DELETE'
+                }).then(() => {
+                    location.reload();
+                });
+            }
+        }
+    </script>
+</body>
+</html>
