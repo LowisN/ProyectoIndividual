@@ -4,40 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Perfil</title>
+    <link rel="stylesheet" href="/css/theme.css">
     <style>
+        :root {
+            --background-color: #f4f4f9;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --header-bg: #1a237e;
+            --header-text: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-color: #dddddd;
+            --primary-color: #3f51b5;
+            --secondary-color: #4CAF50;
+            --error-bg: #ffebee;
+            --error-text: #c62828;
+            --error-border: #ffcdd2;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --success-border: #c8e6c9;
+            --input-bg: #ffffff;
+            --input-text: #333333;
+            --tab-active: #3f51b5;
+            --tab-inactive: #e0e0e0;
+        }
+
+        /* Modo oscuro */
+        body.dark-mode {
+            --background-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --header-bg: #0d1442;
+            --header-text: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --border-color: #333333;
+            --primary-color: #5c6bc0;
+            --secondary-color: #6abf6a;
+            --error-bg: #4a1010;
+            --error-text: #ff6b6b;
+            --error-border: #7a1e1e;
+            --success-bg: #123a12;
+            --success-text: #66bb6a;
+            --success-border: #205420;
+            --input-bg: #2d2d2d;
+            --input-text: #e0e0e0;
+            --tab-active: #5c6bc0;
+            --tab-inactive: #424242;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
+            background-color: var(--background-color);
+            color: var(--text-color);
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-        }
-        
-        .header {
-            background-color: #1a237e;
+            transition: background-color 0.3s, color 0.3s;
+        }          .header {
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
+                url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2290&auto=format&fit=crop') center/cover;
             color: white;
             width: 100%;
-            padding: 1rem 0;
+            padding: 2rem;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 10px var(--shadow-color);
+            position: relative;
         }
         
         .container {
-            background-color: white;
+            background-color: var(--container-bg);
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px var(--shadow-color);
             padding: 2rem;
             margin-top: 3rem;
             width: 80%;
             max-width: 600px;
+            transition: background-color 0.3s, box-shadow 0.3s;
         }
         
         h1, h2 {
             text-align: center;
-            color: #333;
+            color: var(--text-color);
+        }
+        
+        /* Botón de modo oscuro */
+        .theme-toggle {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--header-text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: background-color 0.3s;
+        }
+        
+        .theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.3);
         }
         
         .profile-header {
@@ -46,21 +120,21 @@
             margin-bottom: 2rem;
             flex-direction: column;
         }
-        
-        .profile-image {
+          .profile-image {
             width: 150px;
             height: 150px;
             border-radius: 50%;
             margin-bottom: 1rem;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            background-color: #e0e0e0;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            background-color: var(--tab-inactive);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3rem;
-            color: #757575;
+            color: var(--text-color);
             position: relative;
+            transition: background-color 0.3s, box-shadow 0.3s;
         }
         
         .profile-image img {
@@ -68,12 +142,11 @@
             height: 100%;
             object-fit: cover;
         }
-        
-        .profile-image-upload {
+          .profile-image-upload {
             position: absolute;
             bottom: 0;
             right: 0;
-            background-color: #3f51b5;
+            background-color: var(--primary-color);
             color: white;
             width: 40px;
             height: 40px;
@@ -83,18 +156,8 @@
             justify-content: center;
             cursor: pointer;
             font-size: 1.5rem;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-        
-        .profile-name {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 0.5rem 0;
-        }
-        
-        .profile-email {
-            color: #666;
-            margin: 0;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            transition: background-color 0.3s, box-shadow 0.3s;
         }
         
         .form-group {
@@ -105,15 +168,23 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
-            color: #555;
+            color: var(--text-color);
         }
         
         .form-group input {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
         }
         
         .buttons {
@@ -132,21 +203,23 @@
         }
         
         .btn-primary {
-            background-color: #3f51b5;
+            background-color: var(--primary-color);
             color: white;
         }
         
         .btn-primary:hover {
-            background-color: #303f9f;
+            background-color: var(--primary-color);
+            filter: brightness(1.1);
         }
         
         .btn-secondary {
-            background-color: #f5f5f5;
-            color: #333;
+            background-color: var(--tab-inactive);
+            color: var(--text-color);
         }
         
         .btn-secondary:hover {
-            background-color: #e0e0e0;
+            background-color: var(--tab-inactive);
+            filter: brightness(0.9);
         }
         
         .mensaje {
@@ -157,15 +230,15 @@
         }
         
         .mensaje-exito {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #c8e6c9;
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            border: 1px solid var(--success-border);
         }
         
         .mensaje-error {
-            background-color: #ffebee;
-            color: #c62828;
-            border: 1px solid #ffcdd2;
+            background-color: var(--error-bg);
+            color: var(--error-text);
+            border: 1px solid var(--error-border);
         }
         
         .hidden {
@@ -175,7 +248,7 @@
         .tabs {
             display: flex;
             margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid var(--border-color);
         }
         
         .tab {
@@ -183,11 +256,13 @@
             cursor: pointer;
             border-bottom: 2px solid transparent;
             margin-right: 10px;
+            color: var(--text-color);
+            transition: border-color 0.3s, color 0.3s;
         }
         
         .tab.active {
-            border-bottom: 2px solid #3f51b5;
-            color: #3f51b5;
+            border-bottom: 2px solid var(--tab-active);
+            color: var(--primary-color);
         }
         
         .tab-content {
@@ -197,11 +272,25 @@
         .tab-content.active {
             display: block;
         }
+        
+        /* Estilos para el perfil */
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0.5rem 0;
+            color: var(--text-color);
+        }
+        
+        .profile-email {
+            color: var(--text-color);
+            opacity: 0.7;
+            margin: 0;
+        }
     </style>
 </head>
-<body>
-    <div class="header">
+<body>    <div class="header">
         <h1>Sistema de Recomendaciones</h1>
+        <button id="theme-toggle" class="theme-toggle" title="Cambiar tema">�</button>
     </div>
     
     <div class="container">
@@ -270,9 +359,9 @@
         
         <!-- Mensaje de resultado -->
         <div th:if="${mensaje}" class="mensaje" th:classappend="${tipoMensaje == 'error'} ? 'mensaje-error' : 'mensaje-exito'" th:text="${mensaje}">
-        </div>
-    </div>
+        </div>    </div>
     
+    <script src="/js/dark-mode.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Cambio de tabs
@@ -318,9 +407,7 @@
                         // Establecer la imagen seleccionada en el input del formulario
                         document.getElementById('imagenPerfil').files = fileInput.files;
                     };
-                    reader.readAsDataURL(file);
-                }
-            });
+                    reader.readAsDataURL(file);                }            });
         });
     </script>
 </body>

@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro</title>
-    <style>
+    <title>Registro</title>    <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Georgia', serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                        url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=228&auto=format&fit=crop') center/cover;
             height: 100vh;
-            background-image: url('https://images.unsplash.com/photo-1552302896-5c1349f3337d?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
-            background-size: cover;
-            background-position: center;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         .form-container {
-            background-color: rgba(0, 0, 0, 0.7); 
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo translúcido */
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
@@ -29,6 +31,7 @@
             max-width: 100%;
             color: white;
             text-align: center;
+            position: relative;
         }
 
         h1 {
@@ -42,9 +45,7 @@
             margin-bottom: 5px;
             text-align: left;
             display: block;
-        }
-
-        input[type="text"],
+        }        input[type="text"],
         input[type="email"],
         input[type="password"] {
             padding: 10px;
@@ -55,21 +56,34 @@
             background-color: rgba(255, 255, 255, 0.2);
             color: white;
             margin-bottom: 10px;
+            transition: border-color 0.3s, background-color 0.3s;
         }
 
-        button {
-            padding: 12px;
-            background-color: #4CAF50;
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border: 2px solid #4CAF50; /* Resaltar con color verde */
+        }        button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #2c3e50;
             color: white;
             border: none;
             border-radius: 4px;
-            font-size: 16px;
+            font-size: 1rem;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s;
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #34495e;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-bottom: 1rem;
         }
 
         a {

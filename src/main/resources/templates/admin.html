@@ -3,28 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-image: url('https://images.unsplash.com/photo-1552302896-5c1349f3337d?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
-            background-size: cover;
-            background-position: center;
-        }
-
-        .container {
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    <title>Panel de Administración</title>    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/theme.css">
+    <style>body {
+            font-family: 'Georgia', serif;
+            background-color: var(--background-color, #f4f4f9);
+            color: var(--text-color, #ffffff);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }        .header {
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
+                url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2290&auto=format&fit=crop') center/cover;
             color: white;
+            padding: 2rem;
             text-align: center;
+            width: 100%;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }.container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--container-bg, #ffffff);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow-color, rgba(0, 0, 0, 0.1));
+            color: var(--text-color, #333333);
+            transition: background-color 0.3s, box-shadow 0.3s;
         }
 
         h1 {
@@ -41,12 +46,11 @@
 
         a:hover {
             text-decoration: underline;
-        }
-        .admin-table {
+        }        .admin-table {
             width: 100%;
             margin-top: 20px;
             border-collapse: collapse;
-            color: white;
+            color: var(--text-color);
         }
 
         .admin-table td span {
@@ -58,16 +62,15 @@
 
         .admin-table td span:nth-child(odd) {
             background-color: rgba(76, 175, 80, 0.2);
-        }        
-
-        .admin-table th, .admin-table td {
+        }            .admin-table th, .admin-table td {
             padding: 12px;
-            border: 1px solid #ffffff3d;
+            border: 1px solid var(--border-color);
             text-align: left;
         }
 
         .admin-table th {
-            background-color: rgba(76, 175, 80, 0.3);
+            background-color: var(--primary-color);
+            color: white;
         }
 
         .button {
@@ -92,22 +95,21 @@
             background-color: #4CAF50;
             color: white;
             margin-bottom: 20px;
-        }
-
-        .modal {
+        }        .modal {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.9);
+            background-color: var(--container-bg);
             padding: 20px;
             border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
             z-index: 1000;
         }
 
         .modal-content {
-            color: white;
+            color: var(--text-color);
         }
 
         .form-group {
@@ -127,10 +129,12 @@
         }
     </style>
 </head>
-<body>
-    <div class="container">
+<body>    <div class="header">
         <h1>Panel de Administración</h1>
-        
+        <button id="theme-toggle" class="theme-toggle" title="Cambiar tema">�</button>
+    </div>
+    
+    <div class="container">
         <button class="button add-btn" onclick="showAddModal()">Agregar Usuario</button>
 
         <table class="admin-table">
@@ -193,11 +197,12 @@
                     <button type="button" class="button delete-btn" onclick="hideModal()">Cancelar</button>
                 </form>
             </div>
-        </div>
-
-        <a href="/home" style="margin-top: 20px;">Volver al Inicio</a>
-        <a href="/logout">Cerrar Sesión</a>
-    </div>
+        </div>        <div class="navigation-buttons" style="margin-top: 20px; display: flex; gap: 10px;">
+            <a href="/home" class="button" style="background-color: var(--tab-inactive); color: var(--text-color);">Volver al Inicio</a>
+            <a href="/logout" class="button" style="background-color: var(--error-text); color: white;">Cerrar Sesión</a>
+        </div>    </div>
+    
+    <script src="/js/dark-mode.js"></script>
 
     <script>
         function showAddModal() {

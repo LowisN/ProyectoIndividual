@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
+
     <style>
         body {
             font-family: 'Georgia', serif;
@@ -75,21 +76,19 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-
-
-        .form-container {
+        }        .form-container {
             background-color: rgba(0, 0, 0, 0.7); /* Fondo translúcido */
             padding: 40px;
             border-radius: 10px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 16px var(--shadow-color);
             display: flex;
             flex-direction: column;
             gap: 15px;
             width: 350px;
             max-width: 100%;
-            color: white;
+            color: var(--header-text);
             text-align: center;
+            position: relative;
         }
 
         h1 {
@@ -103,9 +102,7 @@
             margin-bottom: 5px;
             text-align: left;
             display: block;
-        }
-
-        input[type="text"],
+        }        input[type="text"],
         input[type="email"],
         input[type="password"] {
             padding: 10px;
@@ -116,13 +113,14 @@
             background-color: rgba(255, 255, 255, 0.2);
             color: white;
             margin-bottom: 10px;
+            transition: border-color 0.3s, background-color 0.3s;
         }
 
         input[type="text"]:focus,
         input[type="email"]:focus,
         input[type="password"]:focus {
             outline: none;
-            border: 2px solid #4CAF50; /* Resaltar con color verde */
+            border: 2px solid var(--secondary-color); /* Resaltar con color verde */
         }
 
         a {
@@ -137,9 +135,7 @@
         }
     </style>
 </head>
-<body>
-    <div class="form-container">
-        <h1>Iniciar Sesión</h1>
+<body>    <div class="form-container">        <h1>Iniciar Sesión</h1>
         <div th:if="${param.error}" class="error-message">
             Usuario o contraseña incorrectos
         </div>
@@ -149,7 +145,6 @@
             <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña" autocomplete="off" required>
             <button type="submit">Iniciar Sesión</button>
         </form>
-        <a href="/register">¿No tienes cuenta? Regístrate</a>
-    </div>
+        <a href="/register">¿No tienes cuenta? Regístrate</a>    </div>
 </body>
 </html>

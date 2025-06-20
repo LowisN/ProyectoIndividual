@@ -1,0 +1,120 @@
+/**
+ * Estilos comunes para el modo claro y oscuro
+ */
+
+/* Variables de colores para modo claro y oscuro */
+:root {
+    /* Colores del modo claro por defecto */
+    --background-color: #f4f4f9;
+    --container-bg: #ffffff;
+    --text-color: #333333;
+    --header-bg: #1a237e;
+    --header-text: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --border-color: #dddddd;
+    --primary-color: #3f51b5;
+    --secondary-color: #4CAF50;
+    --error-bg: #ffebee;
+    --error-text: #c62828;
+    --error-border: #ffcdd2;
+    --success-bg: #e8f5e9;
+    --success-text: #2e7d32;
+    --success-border: #c8e6c9;
+    --input-bg: #ffffff;
+    --input-text: #333333;
+    --tab-active: #3f51b5;
+    --tab-inactive: #e0e0e0;
+    --card-bg: #ffffff;
+}
+
+/* Modo oscuro */
+body.dark-mode {
+    --background-color: #121212;
+    --container-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --header-bg: #0d1442;
+    --header-text: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --border-color: #333333;
+    --primary-color: #5c6bc0;
+    --secondary-color: #6abf6a;
+    --error-bg: #4a1010;
+    --error-text: #ff6b6b;
+    --error-border: #7a1e1e;
+    --success-bg: #123a12;
+    --success-text: #66bb6a;
+    --success-border: #205420;
+    --input-bg: #2d2d2d;
+    --input-text: #e0e0e0;
+    --tab-active: #5c6bc0;
+    --tab-inactive: #424242;
+    --card-bg: #2d2d2d;
+}
+
+/* Botón de modo oscuro */
+.theme-toggle {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--header-text);
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.3s;
+}
+
+.theme-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Estilos generales que aplican a todas las páginas */
+body {
+    transition: background-color 0.3s, color 0.3s;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.header {
+    position: relative;
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    transition: background-color 0.3s;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-color);
+    transition: color 0.3s;
+}
+
+button, .btn, .button {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+input, select, textarea {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border-color);
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+a {
+    color: var(--primary-color);
+    transition: color 0.3s;
+}
+
+/* Containers y cards */
+.container, .card, .form-container {
+    background-color: var(--container-bg);
+    color: var(--text-color);
+    box-shadow: 0 2px 8px var(--shadow-color);
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
