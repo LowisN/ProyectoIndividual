@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,18 +15,18 @@
 
         .header {
             background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
-                        url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2290&auto=format&fit=crop') center/cover;
+                url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2290&auto=format&fit=crop') center/cover;
             color: white;
             padding: 2rem;
             text-align: center;
         }
-        
+
         h1 {
             margin-bottom: 0.5rem;
             color: #333;
 
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 2rem auto;
@@ -36,6 +38,112 @@
             color: #2c3e50;
             text-align: center;
             margin-bottom: 2rem;
+        }
+
+        .favorites-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #1a237e;
+            padding-bottom: 10px;
+        }
+
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 2rem;
+        }
+
+        .book-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .book-cover {
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .book-info {
+            padding: 15px;
+        }
+
+        .book-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .book-author {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .book-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .book-button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .details-button {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .details-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .remove-button {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .remove-button:hover {
+            background-color: #d32f2f;
+        }
+
+        .no-favorites {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
         }
 
         .menu-options {
@@ -53,18 +161,18 @@
             text-decoration: none;
             text-align: center;
             transition: transform 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .menu-button:hover {
             transform: translateY(-5px);
         }
-        
+
         h1 {
             margin-bottom: 0.5rem;
-            color: #333;
+            color: #ffffff;
         }
-        
+
         .logout {
             text-align: center;
             margin-top: 2rem;
@@ -78,28 +186,155 @@
         .logout a:hover {
             color: #34495e;
         }
+
+        /* Estilos para el panel de administrador */
+        .admin-panel {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 2rem;
+        }
+
+        .admin-panel h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .admin-content {
+            margin-top: 1rem;
+            color: #555;
+        }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const favoriteBooksContainer = document.getElementById('favoriteBooks');
+
+            // Cargar libros favoritos al inicio
+            function loadFavoriteBooks() {
+                fetch('/api/libros/favoritos')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al cargar favoritos');
+                        }
+                        return response.json();
+                    })
+                    .then(favorites => {
+                        if (favorites && favorites.length > 0) {
+                            displayFavoriteBooks(favorites);
+                        } else {
+                            favoriteBooksContainer.innerHTML = '<p class="no-favorites">No tienes libros favoritos aún.</p>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        favoriteBooksContainer.innerHTML = '<p class="no-favorites">Error al cargar los favoritos.</p>';
+                    });
+            }
+
+            function displayFavoriteBooks(favorites) {
+                favoriteBooksContainer.innerHTML = '';
+
+                favorites.forEach(book => {
+                    const bookCard = document.createElement('div');
+                    bookCard.className = 'book-card';
+
+                    // Sanitizar datos
+                    const safeTitle = book.titulo || 'Título desconocido';
+                    const safeAuthor = book.autor || 'Autor desconocido';
+                    const safeImageUrl = book.imagenUrl || 'https://openlibrary.org/images/icons/avatar_book-sm.png';
+
+                    bookCard.innerHTML = `
+                        <div class="book-cover">
+                            <img src="${safeImageUrl}" 
+                                alt="Portada de ${safeTitle}" 
+                                onerror="this.src='https://openlibrary.org/images/icons/avatar_book-sm.png'"
+                                loading="lazy">
+                        </div>
+                        <div class="book-info">
+                            <h3 class="book-title">${book.titulo}</h3>
+                            <p class="book-author">${book.autor}</p>
+                            <div class="book-actions">
+                                <a href="https://openlibrary.org${book.libroId}" target="_blank" class="book-button details-button">Ver detalles</a>
+                                <button class="book-button remove-button" data-id="${book.id}">Quitar de favoritos</button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Evento para quitar de favoritos
+                    const removeButton = bookCard.querySelector('.remove-button');
+                    removeButton.addEventListener('click', function () {
+                        const bookId = this.getAttribute('data-id');
+                        fetch(`/api/libros/favoritos/${bookId}`, {
+                            method: 'DELETE'
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    bookCard.remove();
+                                    if (favoriteBooksContainer.children.length === 0) {
+                                        favoriteBooksContainer.innerHTML = '<p class="no-favorites">No tienes libros favoritos aún.</p>';
+                                    }
+                                } else {
+                                    throw new Error('Error al eliminar de favoritos');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Error al eliminar el libro de favoritos');
+                            });
+                    });
+
+                    favoriteBooksContainer.appendChild(bookCard);
+                });
+            }
+
+            // Cargar favoritos al iniciar la página
+            loadFavoriteBooks();
+        });
+    </script>
 </head>
+
 <body>
     <div class="header">
         <h1>Sistema de Recomendaciones</h1>
     </div>
-    
+
     <div class="container">
         <h1>Bienvenido</h1>
-        <p class="welcome-message">Hola, Usuario</p>
-        
+        <p class="welcome-message">
+            Hola, <span th:text="${username}">Usuario</span>
+        </p>
         <div class="menu-options">
-            <a href="/libros" class="menu-button">Libros</a>
-            <a href="/peliculas" class="menu-button">Películas</a>
+            <a href="/libros" class="menu-button">Buscar Libros</a>
             <a href="/perfil" class="menu-button">Mi Perfil</a>
-            <a sec:authorize="hasRole('ROLE_ADMIN')" href="/admin" 
-            class="menu-button admin-button">
-            Panel de Administrador
-            </a>
+            <a th:if="${isAdmin}" href="/admin" class="menu-button">Panel de Administración</a>
         </div>
-        
-        <a href="/logout" class="logout">Cerrar Sesión</a>
+
+        <!-- Sección de Libros Favoritos -->
+        <div id="favoritesSection" class="favorites-section">
+            <h2 class="section-title">Mis Libros Favoritos</h2>
+            <div id="favoriteBooks" class="book-grid">
+                <!-- Los libros favoritos se mostrarán aquí -->
+            </div>
+        </div>
+
+        <!-- Panel de Administrador -->
+        <div class="admin-panel"
+            th:if="${#authorization != null && #authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+            <h2>Panel de Administrador</h2>
+            <div class="admin-content">
+                <!-- Aquí va el contenido del panel de administrador -->
+                <p>Bienvenido al panel de administrador. Desde aquí puedes gestionar el sistema.</p>
+                <!-- Agregar más contenido y funcionalidades para el panel de administrador -->
+            </div>
+        </div>
+
+        <!--div th:if="${isAdmin}"></div>
+        <a href="/admin" class="menu-button">Panel de Administración</a>
+    </div-->
+
+    <a href="/logout" class="menu-button">Cerrar Sesión</a>
     </div>
 </body>
+
 </html>

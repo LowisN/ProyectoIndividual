@@ -5,41 +5,47 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()  // Desactiva CSRF para facilitar el acceso desde la aplicación móvil
-            .authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/api/auth/**").permitAll()  // Permitir acceso sin autenticación a la app móvil
-                .requestMatchers("/admin").hasRole("ADMIN")
-                .requestMatchers("/perfil").authenticated()
-                .requestMatchers("/home").authenticated()
-                .anyRequest().permitAll()
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/login", "/register", "/error", "/css/**", "/js/**").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
             )
-            .formLogin((form) -> form
-                .loginPage("/login")  // Mantiene el form login para el navegador
-                .defaultSuccessUrl("/home", true)  // Redirige a /home tras login exitoso
+            .formLogin(form -> form
+                .loginPage("/login")
+                .defaultSuccessUrl("/home", true)
+                .failureUrl("/login?error=true")
                 .permitAll()
             )
-            .logout((logout) -> logout.permitAll());
+            .logout(logout -> logout
+                .logoutSuccessUrl("/login?logout=true")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .permitAll()
+            );
 
         return http.build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 }

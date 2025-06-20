@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -181,9 +182,11 @@
                     </div>
                     <div class="form-group">
                         <label for="roles">Roles:</label>
-                        <select id="roles" name="roles" multiple required>
-                            <option value="ROLE_USER">Usuario</option>
-                            <option value="ROLE_ADMIN">Administrador</option>
+                        <select id="roles" name="roleNames" multiple required class="form-control">
+                            <option th:each="rol : ${todosRoles}"
+                                    th:value="${rol.id}"
+                                    th:text="${#strings.replace(rol.nombre, 'ROLE_', '')}">
+                            </option>
                         </select>
                     </div>
                     <button type="submit" class="button add-btn">Guardar</button>
@@ -213,7 +216,7 @@
                     document.getElementById('nombre').value = user.nombre;
                     document.getElementById('email').value = user.email;
                     
-                    // Configurar roles
+                    // Actualizar selección de roles
                     const rolesSelect = document.getElementById('roles');
                     const userRoles = user.roles.map(rol => rol.nombre);
                     Array.from(rolesSelect.options).forEach(option => {

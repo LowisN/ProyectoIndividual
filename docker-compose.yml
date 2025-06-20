@@ -8,13 +8,16 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "5000:5000"  # Cambiado a puerto 5000
     depends_on:
       - db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/practica2?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SERVER_PORT=5000
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/practica2?allowPublicKeyRetrieval=true&useSSL=false
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
     networks:
       - app-network
     restart: always

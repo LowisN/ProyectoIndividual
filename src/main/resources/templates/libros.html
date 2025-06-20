@@ -12,14 +12,36 @@
             padding: 0;
             min-height: 100vh;
         }
-        
-        .header {
+          .header {
             background-color: #1a237e;
             color: white;
             width: 100%;
             padding: 1rem 0;
             text-align: center;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .favorites-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #1a237e;
+            padding-bottom: 10px;
+        }
+
+        .no-favorites {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
         }
         
         .container {
@@ -192,9 +214,21 @@
             background-color: #3f51b5;
             color: white;
         }
+          .favorite-button {
+            background-color: #4CAF50;
+            color: white;
+        }
         
-        .recommend-button:hover {
-            background-color: #303f9f;
+        .favorite-button:hover {
+            background-color: #388E3C;
+        }
+
+        .favorite-button.added {
+            background-color: #f44336;
+        }
+        
+        .favorite-button.added:hover {
+            background-color: #d32f2f;
         }
         
         .pagination {
@@ -279,8 +313,18 @@
     <div class="header">
         <h1>Búsqueda de Libros</h1>
     </div>
-    
     <div class="container">
+        <div class="navigation-buttons">
+            <a href="/home" class="back-button">Volver al inicio</a>
+        </div>
+        <!-- Sección de Favoritos -->
+        <div id="favoritesSection" class="favorites-section">
+            <h2 class="section-title">Mis Libros Favoritos</h2>
+            <div id="favoriteBooks" class="book-grid">
+                <!-- Los libros favoritos se mostrarán aquí -->
+            </div>
+        </div>
+
         <div class="search-section">
             <h2 class="search-title">Buscar Libros</h2>
             <div class="search-form">
@@ -333,42 +377,234 @@
             <p>Intenta con otros términos o criterios de búsqueda.</p>
         </div>
         
-        <div class="navigation-buttons">
-            <a href="/home" class="back-button">Volver al inicio</a>
-        </div>
     </div>
-    
-    <script>
+      <script>
+        // Función para escapar caracteres especiales en atributos HTML
+        function escapeHTML(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const searchButton = document.getElementById('searchButton');
             const titleInput = document.getElementById('title');
             const authorInput = document.getElementById('author');
+            const favoriteBooksContainer = document.getElementById('favoriteBooks');
             const subjectInput = document.getElementById('subject');
             const bookGrid = document.getElementById('bookGrid');
             const resultsSection = document.getElementById('resultsSection');
             const noResults = document.getElementById('noResults');
             const loading = document.getElementById('loading');
             const pagination = document.getElementById('pagination');
-            
+
+            // Variables para la paginación
             let currentPage = 1;
             const itemsPerPage = 10;
             let totalResults = 0;
-            let allBooks = [];
-            
-            searchButton.addEventListener('click', function() {
-                performSearch(1);
-            });
-            
-            // Permitir la búsqueda al presionar Enter en los campos de texto
-            [titleInput, authorInput].forEach(input => {
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        performSearch(1);
+
+            // Función para cargar los libros favoritos
+            async function loadFavoriteBooks() {
+                try {
+                    const response = await fetch('/api/libros/favoritos');
+                    if (!response.ok) {
+                        throw new Error('Error al cargar favoritos');
+                    }
+                    const favorites = await response.json();
+                    if (favorites && favorites.length > 0) {
+                        displayFavoriteBooks(favorites);
+                    } else {
+                        favoriteBooksContainer.innerHTML = '<p class="no-favorites">No tienes libros favoritos aún.</p>';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    favoriteBooksContainer.innerHTML = '<p class="no-favorites">Error al cargar los favoritos.</p>';
+                }
+            }
+
+            // Función para mostrar los libros favoritos
+            function displayFavoriteBooks(favorites) {
+                favoriteBooksContainer.innerHTML = '';
+                
+                favorites.forEach(book => {
+                    try {
+                        if (!book.id) {
+                            console.error('Libro sin ID:', book);
+                            return;
+                        }
+
+                        const bookCard = document.createElement('div');
+                        bookCard.className = 'book-card';
+                        
+                        const safeTitle = escapeHTML(book.titulo || 'Título desconocido');
+                        const safeAuthor = escapeHTML(book.autor || 'Autor desconocido');
+                        const safeImagenUrl = book.imagenUrl || '/api/placeholder/250/300';
+                        
+                        bookCard.innerHTML = `
+                            <div class="book-cover">
+                                <img src="${safeImagenUrl}" 
+                                    alt="Portada de ${safeTitle}" 
+                                    onerror="this.src='https://openlibrary.org/images/icons/avatar_book-sm.png'"
+                                    loading="lazy">
+                            </div>
+                            <div class="book-info">
+                                <h3 class="book-title">${safeTitle}</h3>
+                                <p class="book-author">${safeAuthor}</p>
+                                <div class="book-actions">
+                                    <button class="book-button details-button" onclick="window.open('https://openlibrary.org${book.libroId}', '_blank')">Ver detalles</button>
+                                    <button class="book-button favorite-button added" data-id="${book.id}">Quitar de favoritos</button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        const removeButton = bookCard.querySelector('.favorite-button');
+                        removeButton.addEventListener('click', async function() {
+                            try {
+                                const bookId = this.getAttribute('data-id');
+                                if (!bookId) {
+                                    throw new Error('ID del libro no encontrado');
+                                }
+
+                                const response = await fetch(`/api/libros/favoritos/${bookId}`, {
+                                    method: 'DELETE'
+                                });
+
+                                const data = await response.json();
+                                
+                                if (!response.ok) {
+                                    throw new Error(data.message || 'Error al eliminar de favoritos');
+                                }
+
+                                bookCard.remove();
+                                if (favoriteBooksContainer.children.length === 0) {
+                                    favoriteBooksContainer.innerHTML = '<p class="no-favorites">No tienes libros favoritos aún.</p>';
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                                alert(error.message || 'Error al eliminar el libro de favoritos');
+                            }
+                        });
+                        
+                        favoriteBooksContainer.appendChild(bookCard);
+                    } catch (error) {
+                        console.error('Error al procesar libro favorito:', error);
                     }
                 });
-            });
-            
-            function performSearch(page) {
+            }
+
+            // Función para mostrar los resultados de búsqueda
+            function displayBooks(books) {
+                bookGrid.innerHTML = '';
+                
+                books.forEach(book => {
+                    try {
+                        const bookCard = document.createElement('div');
+                        bookCard.className = 'book-card';
+                        
+                        const coverUrl = book.cover_i 
+                            ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+                            : '/api/placeholder/250/300';
+                        
+                        const publishYear = book.first_publish_year 
+                            || (book.publish_year ? book.publish_year[0] : 'Desconocido');
+                        
+                        const authors = book.author_name 
+                            ? book.author_name.join(', ')
+                            : 'Autor desconocido';
+                        
+                        const safeTitle = escapeHTML(book.title || 'Título desconocido');
+                        const safeAuthors = escapeHTML(authors);
+                        const safeKey = escapeHTML(book.key || '');
+
+                        if (!safeKey) {
+                            console.error('Libro sin identificador:', book);
+                            return;
+                        }
+                        
+                        bookCard.innerHTML = `
+                            <div class="book-cover">
+                                <img src="${coverUrl}" alt="Portada de ${safeTitle}" onerror="this.src='/api/placeholder/250/300'">
+                            </div>
+                            <div class="book-info">
+                                <h3 class="book-title">${safeTitle}</h3>
+                                <p class="book-author">${safeAuthors}</p>
+                                <p class="book-year">${publishYear}</p>
+                                <div class="book-actions">
+                                    <button class="book-button details-button" data-key="${safeKey}">Ver detalles</button>                                <button class="book-button favorite-button" 
+                                        data-key="${safeKey}"
+                                        data-title="${safeTitle}"
+                                        data-author="${safeAuthors}"
+                                        data-cover="${coverUrl}"
+                                        title="Agregar a favoritos">
+                                        Agregar a favoritos
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+
+                        const detailsButton = bookCard.querySelector('.details-button');
+                        detailsButton.addEventListener('click', function() {
+                            const key = this.getAttribute('data-key');
+                            window.open(`https://openlibrary.org${key}`, '_blank');
+                        });                        const favoriteButton = bookCard.querySelector('.favorite-button');
+                        favoriteButton.addEventListener('click', async function() {
+                            try {
+                                const libroId = this.getAttribute('data-key');
+                                const titulo = this.getAttribute('data-title');
+                                const autor = this.getAttribute('data-author');
+                                const imagenUrl = this.getAttribute('data-cover');
+
+                                if (!libroId) {
+                                    throw new Error('ID del libro no encontrado');
+                                }
+
+                                // Verificar y limpiar los datos                                // Validar y sanitizar los datos antes de enviarlos
+                                const cleanTitle = titulo ? titulo.trim() : '';
+                                const cleanAuthor = autor ? autor.trim() : '';
+                                const cleanImageUrl = imagenUrl ? imagenUrl.trim() : '';
+
+                                const bookData = {
+                                    libroId: libroId.trim(),
+                                    titulo: cleanTitle || 'Título desconocido',
+                                    autor: cleanAuthor || 'Autor desconocido',
+                                    imagenUrl: cleanImageUrl || 'https://openlibrary.org/images/icons/avatar_book-sm.png'
+                                };
+
+                                const response = await fetch('/api/libros/favoritos', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify(bookData)
+                                });
+
+                                const data = await response.json();
+                                
+                                if (!response.ok) {
+                                    throw new Error(data.message || 'Error al procesar la solicitud');
+                                }
+
+                                this.textContent = data.status === 'added' ? 'Quitar de favoritos' : 'Agregar a favoritos';
+                                this.classList.toggle('added');
+                                
+                                // Recargar la sección de favoritos
+                                await loadFavoriteBooks();
+                            } catch (error) {
+                                console.error('Error:', error);
+                                alert(error.message || 'Ocurrió un error al procesar tu solicitud');
+                            }
+                        });
+                        
+                        bookGrid.appendChild(bookCard);
+                    } catch (error) {
+                        console.error('Error al procesar libro:', error);
+                    }
+                });
+            }
+
+            // Función para realizar la búsqueda
+            async function performSearch(page) {
                 const title = titleInput.value.trim();
                 const author = authorInput.value.trim();
                 const subject = subjectInput.value;
@@ -378,168 +614,112 @@
                     return;
                 }
                 
-                // Mostrar loader
                 loading.style.display = 'block';
                 resultsSection.style.display = 'none';
                 noResults.style.display = 'none';
                 
-                // Construir la URL de búsqueda
-                let searchQuery = [];
-                
-                if (title) {
-                    searchQuery.push(`title=${encodeURIComponent(title)}`);
-                }
-                
-                if (author) {
-                    searchQuery.push(`author=${encodeURIComponent(author)}`);
-                }
-                
-                if (subject) {
-                    searchQuery.push(`subject=${encodeURIComponent(subject)}`);
-                }
-                
-                // Si hay título, autor o categoría específicos, usamos los parámetros correspondientes
-                // Si no, usamos un término de búsqueda general
-                let apiUrl;
-                if (searchQuery.length > 0) {
-                    apiUrl = `https://openlibrary.org/search.json?${searchQuery.join('&')}&page=${page}`;
-                } else {
-                    // Búsqueda general si no hay criterios específicos
-                    apiUrl = `https://openlibrary.org/search.json?q=${encodeURIComponent(title || author || '')}`;
-                }
-                
-                fetch(apiUrl)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Error en la respuesta de la API');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        // Ocultar loader
-                        loading.style.display = 'none';
-                        
-                        if (data.docs && data.docs.length > 0) {
-                            // Guardar todos los libros y la página actual
-                            allBooks = data.docs;
-                            currentPage = page;
-                            totalResults = data.numFound;
-                            
-                            // Mostrar resultados
-                            displayBooks(allBooks);
-                            // Actualizar paginación
-                            updatePagination();
-                            
-                            // Mostrar sección de resultados
-                            resultsSection.style.display = 'block';
-                        } else {
-                            // Mostrar mensaje de no resultados
-                            noResults.style.display = 'block';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        loading.style.display = 'none';
-                        alert('Ocurrió un error al buscar los libros. Por favor, intenta de nuevo.');
-                    });
-            }
-            
-            function displayBooks(books) {
-                // Limpiar el contenedor de libros
-                bookGrid.innerHTML = '';
-                
-                // Mostrar los libros
-                books.forEach(book => {
-                    // Crear elemento de tarjeta para el libro
-                    const bookCard = document.createElement('div');
-                    bookCard.className = 'book-card';
+                try {
+                    // Construir la consulta de búsqueda
+                    let searchParams = new URLSearchParams();
                     
-                    // Obtener la imagen de la portada si está disponible
-                    let coverUrl = '/api/placeholder/250/300';
-                    if (book.cover_i) {
-                        coverUrl = `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`;
+                    // Si hay título o autor, usar búsqueda general
+                    if (title || author) {
+                        let generalQuery = [];
+                        if (title) generalQuery.push(title);
+                        if (author) generalQuery.push(`author:${author}`);
+                        searchParams.append('q', generalQuery.join(' '));
                     }
                     
-                    // Obtener el año de publicación si está disponible
-                    let publishYear = book.first_publish_year || (book.publish_year ? book.publish_year[0] : 'Desconocido');
+                    // Agregar categoría si está seleccionada
+                    if (subject) {
+                        searchParams.append('subject', subject);
+                    }
                     
-                    // Obtener autores si están disponibles
-                    let authors = book.author_name ? book.author_name.join(', ') : 'Autor desconocido';
+                    // Agregar parámetros de paginación
+                    searchParams.append('page', page.toString());
+                    searchParams.append('limit', '10');
                     
-                    // Obtener descripción o usar un placeholder
-                    let description = 'No hay descripción disponible para este libro.';
+                    // Fields necesarios para mostrar los resultados
+                    searchParams.append('fields', 'key,title,author_name,first_publish_year,cover_i');
                     
-                    // Estructura HTML de la tarjeta
-                    bookCard.innerHTML = `
-                        <div class="book-cover">
-                            <img src="${coverUrl}" alt="Portada de ${book.title}" onerror="this.src='/api/placeholder/250/300'">
-                        </div>
-                        <div class="book-info">
-                            <h3 class="book-title">${book.title}</h3>
-                            <p class="book-author">${authors}</p>
-                            <p class="book-year">${publishYear}</p>
-                            <p class="book-description">${description}</p>
-                            <div class="book-actions">
-                                <button class="book-button details-button" data-key="${book.key}">Ver detalles</button>
-                                <button class="book-button recommend-button" data-key="${book.key}">Recomendar</button>
-                            </div>
-                        </div>
-                    `;
+                    const apiUrl = `https://openlibrary.org/search.json?${searchParams.toString()}`;
+                    console.log('Buscando en:', apiUrl);
                     
-                    // Agregar evento para el botón de detalles
-                    bookCard.querySelector('.details-button').addEventListener('click', function() {
-                        const key = this.getAttribute('data-key');
-                        window.open(`https://openlibrary.org${key}`, '_blank');
-                    });
+                    const response = await fetch(apiUrl);
                     
-                    // Agregar evento para el botón de recomendar (aquí puedes implementar tu propia lógica)
-                    bookCard.querySelector('.recommend-button').addEventListener('click', function() {
-                        const key = this.getAttribute('data-key');
-                        alert(`Libro recomendado: ${book.title}`);
-                        // Aquí podrías implementar la lógica para guardar la recomendación en tu backend
-                    });
+                    if (!response.ok) {
+                        throw new Error(`Error en la respuesta: ${response.status}`);
+                    }
                     
-                    // Agregar la tarjeta al grid
-                    bookGrid.appendChild(bookCard);
-                });
+                    const data = await response.json();
+                    
+                    // Ocultar loader
+                    loading.style.display = 'none';
+                    
+                    if (data.docs && data.docs.length > 0) {
+                        // Guardar datos de paginación
+                        currentPage = page;
+                        totalResults = data.numFound;
+                        
+                        // Mostrar resultados
+                        displayBooks(data.docs);
+                        updatePagination();
+                        resultsSection.style.display = 'block';
+                    } else {
+                        noResults.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Error en la búsqueda:', error);
+                    loading.style.display = 'none';
+                    alert('Ocurrió un error al buscar los libros. Por favor, intenta de nuevo.');
+                }
             }
-            
+
             function updatePagination() {
-                // Limpiar paginación
                 pagination.innerHTML = '';
                 
-                // Calcular número total de páginas
+                const itemsPerPage = 10;
                 const totalPages = Math.ceil(totalResults / itemsPerPage);
                 
-                // Si hay muchas páginas, mostrar solo un subconjunto
+                if (totalPages <= 1) {
+                    return;
+                }
+                
+                // Determinar el rango de páginas a mostrar
                 let startPage = Math.max(1, currentPage - 2);
                 let endPage = Math.min(totalPages, currentPage + 2);
                 
-                // Asegurar que siempre se muestren al menos 5 páginas si están disponibles
+                // Asegurar que se muestren al menos 5 páginas si están disponibles
                 if (endPage - startPage < 4) {
                     if (startPage === 1) {
                         endPage = Math.min(5, totalPages);
                     } else {
-                        startPage = Math.max(1, endPage - 4);
+                        startPage = Math.max(1, totalPages - 4);
                     }
                 }
                 
-                // Botón para primera página
+                // Agregar botón de primera página si no estamos en las primeras páginas
                 if (startPage > 1) {
                     addPaginationButton(1, '«');
+                    if (startPage > 2) {
+                        addPaginationButton(null, '...');
+                    }
                 }
                 
-                // Botones de páginas
+                // Agregar botones de páginas numeradas
                 for (let i = startPage; i <= endPage; i++) {
                     addPaginationButton(i, i.toString(), i === currentPage);
                 }
                 
-                // Botón para última página
+                // Agregar botón de última página si no estamos en las últimas páginas
                 if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        addPaginationButton(null, '...');
+                    }
                     addPaginationButton(totalPages, '»');
                 }
             }
-            
+
             function addPaginationButton(page, text, isActive = false) {
                 const button = document.createElement('button');
                 button.className = 'pagination-button';
@@ -548,14 +728,29 @@
                 }
                 button.textContent = text;
                 
-                button.addEventListener('click', function() {
-                    if (page !== currentPage) {
-                        performSearch(page);
-                    }
-                });
+                if (page !== null) {
+                    button.addEventListener('click', () => {
+                        if (page !== currentPage) {
+                            performSearch(page);
+                        }
+                    });
+                } else {
+                    button.disabled = true;
+                }
                 
                 pagination.appendChild(button);
             }
+
+            // Event Listeners
+            searchButton.addEventListener('click', () => performSearch(1));
+            [titleInput, authorInput].forEach(input => {
+                input.addEventListener('keypress', e => {
+                    if (e.key === 'Enter') performSearch(1);
+                });
+            });
+
+            // Cargar favoritos al iniciar
+            loadFavoriteBooks();
         });
     </script>
 </body>

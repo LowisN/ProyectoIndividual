@@ -7,9 +7,15 @@ import mx.ipn.escom.Recomendaciones.auth.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import mx.ipn.escom.Recomendaciones.auth.entity.Rol;
+import mx.ipn.escom.Recomendaciones.auth.repository.RolRepository;
+import java.util.Collections;
 
 @Service
 public class UsuarioService {
+    
+    @Autowired
+    private RolRepository rolRepository;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -19,7 +25,15 @@ public class UsuarioService {
 
     // Mantener el método existente
     public void registrarUsuario(Usuario usuario) {
+        // Codificar la contraseña
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        
+        // Buscar y asignar el rol USER por defecto
+        Rol rolUsuario = rolRepository.findByNombre("ROLE_USER")
+            .orElseThrow(() -> new RuntimeException("Error: Rol de usuario no encontrado."));
+        usuario.setRoles(Collections.singleton(rolUsuario));
+        
+        // Guardar el usuario
         usuarioRepository.save(usuario);
     }
 
@@ -41,12 +55,16 @@ public class UsuarioService {
             }
             usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         } else {
-            // Actualización de usuario
+            // Usuario existente
             Usuario existingUser = findById(usuario.getId());
             if (usuario.getPassword() == null || usuario.getPassword().isEmpty()) {
                 usuario.setPassword(existingUser.getPassword());
             } else {
                 usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+            }
+            // Mantener los roles existentes si no se proporcionan nuevos
+            if (usuario.getRoles() == null || usuario.getRoles().isEmpty()) {
+                usuario.setRoles(existingUser.getRoles());
             }
         }
         return usuarioRepository.save(usuario);

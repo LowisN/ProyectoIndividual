@@ -2,6 +2,7 @@ package mx.ipn.escom.Recomendaciones.auth.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -11,9 +12,12 @@ import mx.ipn.escom.Recomendaciones.auth.entity.Rol;
 import mx.ipn.escom.Recomendaciones.auth.repository.RolRepository;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.List;
+import java.util.HashSet;
 
 @Controller
 @RequestMapping("/admin")
+@PreAuthorize("hasRole('ROLE_ADMIN')")  // Agregar esta línea
 public class AdminController {
 
     @Autowired
@@ -25,6 +29,7 @@ public class AdminController {
     @GetMapping("")
     public String adminPanel(Model model) {
         model.addAttribute("usuarios", usuarioService.findAll());
+        model.addAttribute("todosRoles", rolRepository.findAll());
         return "admin";
     }
 
@@ -35,14 +40,15 @@ public class AdminController {
     }
 
     @PostMapping("/saveUser")
-    public String saveUser(@ModelAttribute Usuario usuario, @RequestParam(value = "roles", required = false) Set<String> roleNames) {
-        if (roleNames != null) {
-            Set<Rol> roles = roleNames.stream()
-                .map(roleName -> rolRepository.findByNombre(roleName)
-                    .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + roleName)))
+    public String saveUser(@ModelAttribute Usuario usuario, @RequestParam(value = "roleNames", required = false) List<Long> roleIds) {
+        Set<Rol> roles = new HashSet<>();
+        if (roleIds != null) {
+            roles = roleIds.stream()
+                .map(roleId -> rolRepository.findById(roleId)
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + roleId)))
                 .collect(Collectors.toSet());
-            usuario.setRoles(roles);
         }
+        usuario.setRoles(roles);
         usuarioService.save(usuario);
         return "redirect:/admin";
     }

@@ -25,10 +25,6 @@ public class RegistroController {
     public String registerUser(@ModelAttribute("usuario") Usuario usuario, Model model) {
         // Lógica para registrar al usuario en la base de datos
         usuarioService.registrarUsuario(usuario);
-
-        // Añadir el usuario al modelo para mostrar en la vista de registro exitoso
-        model.addAttribute("usuario", usuario);
-
-        return "registroExitoso";  // Redirige a la página de registro exitoso
+        return "redirect:/login";  // Redirige al login después del registro exitoso
     }
 }

@@ -1,5 +1,7 @@
 package mx.ipn.escom.Recomendaciones.auth.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,6 +34,10 @@ public class Usuario {
             inverseJoinColumns = @JoinColumn(name = "rol_id")
     )
     private Set<Rol> roles = new HashSet<>();
+
+    @JsonIgnore // Agregar esta anotación
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private Set<LibroFavorito> librosFavoritos;
 
     // Getters y setters
 
@@ -81,5 +87,13 @@ public class Usuario {
 
     public void setRoles(Set<Rol> roles) {
         this.roles = roles;
+    }
+
+    public Set<LibroFavorito> getLibrosFavoritos() {
+        return librosFavoritos;
+    }
+
+    public void setLibrosFavoritos(Set<LibroFavorito> librosFavoritos) {
+        this.librosFavoritos = librosFavoritos;
     }
 }

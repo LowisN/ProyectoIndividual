@@ -6,7 +6,7 @@ WORKDIR /app
 COPY pom.xml /app/
 
 # Descargar dependencias
-RUN mvn dependency:go-offline
+RUN mvn dependency:go-offline -DskipTests
 
 # Copiamos el código fuente
 COPY src /app/src
@@ -23,7 +23,10 @@ WORKDIR /app
 COPY --from=builder /app/target/Recomendaciones-0.0.1-SNAPSHOT.jar /app/app.jar
 
 # Puerto que expone la aplicación
-EXPOSE 8080
+EXPOSE 5000
+
+# Variables de entorno para Java
+ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
 # Comando para ejecutar la aplicación
 CMD ["java", "-jar", "app.jar"]
